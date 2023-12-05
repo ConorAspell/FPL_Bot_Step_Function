@@ -1,0 +1,63 @@
+{
+  "Comment": "Control FPL Update",
+  "StartAt": "DateChecker",
+  "States": {
+    "DateChecker": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-west-1:$AWS_NUMBER:function:DateChecker",
+      "InputPath": "$",
+      "ResultPath": "$.functionResult",
+      "OutputPath": "$",
+      "Next": "CheckResult"
+    },
+    "CheckResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.functionResult",
+          "BooleanEquals": false,
+          "Next": "StopProcessing"
+        }
+      ],
+      "Default": "OddsGetter"
+    },
+    "StopProcessing": {
+      "Type": "Succeed"
+    },
+    "OddsGetter": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-west-1:$AWS_NUMBER:function:oddsGetter",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Next": "GetPlayerDetails"
+    },
+    "GetPlayerDetails": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-west-1:$AWS_NUMBER:function:getPlayerDetails",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Next": "CalculateTransfersAndTeam"
+    },
+    "CalculateTransfersAndTeam": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-west-1:$AWS_NUMBER:function:calculate_fpl_chages",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Next": "PostTransfer"
+    },
+    "PostTransfer": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-west-1:$AWS_NUMBER:function:post_transfer",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Next": "PostFinalTeam"
+    },
+    "PostFinalTeam": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-west-1:$AWS_NUMBER:function:post_final_team",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "End": true
+    }
+  }
+}
